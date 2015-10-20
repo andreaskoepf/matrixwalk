@@ -57,9 +57,15 @@ function BatchGenerator:get_settings()
   return extract(self, { 'batch_size', 'sequence_length', 'max_noturn_walk', 'enable_action_input' })
 end
 
-function BatchGenerator:next()
+function BatchGenerator:next(include_positions)
   local x = torch.zeros(self.batch_size, self.sequence_length, 2)
   local y = torch.DoubleTensor(self.batch_size, self.sequence_length)
+  local pos
+  
+  if include_positions then
+    pos = torch.LongTensor(self.batch_size, self.sequence_length, self.world:dim())
+  end
+  
   for t = 1,self.sequence_length do
     for i = 1,#self.agents do
       local a = self.agents[i]
@@ -77,9 +83,18 @@ function BatchGenerator:next()
       x[{i, t, 2}] = self.enable_action_input and action or 1
 
       a:move(action)
+      
+      -- optional: capture position after agent movement (corresponding to the prediction)
+      if pos then
+        pos[{i, t}] = torch.LongTensor(a.pos) 
+      end
+      
       y[{i, t}] = a:sensor()            -- target: observation after action
     end
   end
-  return x, y
+ print('next') 
+  return x, y, pos
 end
+
+
   

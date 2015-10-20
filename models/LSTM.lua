@@ -46,7 +46,7 @@ function LSTM.lstm(num_inputs, num_actions, num_hidden_layer_neurons, num_hidden
     -- perform the LSTM update
     local next_c = nn.CAddTable()({
         nn.CMulTable()({forget_gate, prev_c}),
-        nn.CMulTable()({in_gate,     in_transform})
+        nn.CMulTable()({in_gate, in_transform})
       })
     -- gated cells form the output
     local next_h = nn.CMulTable()({out_gate, nn.Tanh()(next_c)})
